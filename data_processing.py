@@ -106,6 +106,7 @@ my_DB.insert(table5)
 my_table1 = my_DB.search('cities')
 my_table3 = my_DB.search('players')
 my_table4 = my_DB.search('teams')
+my_table5 = my_DB.search('titanic')
 table3_team = my_table3.filter(lambda x: "ia" in x["team"]).filter(
     lambda x: int(x['minutes']) <= 200).filter(lambda x: int(x['passes']) >= 100)
 print(table3_team)
@@ -120,6 +121,19 @@ my_table_mid = my_table3.filter(lambda x: x["position"] == "midfielder")
 my_table_forward = my_table3.filter(lambda x: x["position"] == "forward")
 print("average midfielder:", my_table_mid.aggregate(lambda x: sum(x)/len(x), 'passes'), "forward:",
       my_table_forward.aggregate(lambda x: sum(x)/len(x), 'passes'))
+
+my_first_class = my_table5.filter(lambda x: int(x["class"]) == 1)
+my_third_class = my_table5.filter(lambda x: int(x["class"]) == 3)
+print("average first class:", my_first_class.aggregate(lambda x: sum(x)/len(x), 'fare'), "third class:",
+      my_third_class.aggregate(lambda x: sum(x)/len(x), 'fare'))
+men = my_table5.filter(lambda x: x['gender'] == 'M')
+women = my_table5.filter(lambda x: x['gender'] == 'F')
+men_survival = men.filter(lambda x: x['survived'] == 'yes')
+women_survival = women.filter(lambda x: x['survived'] == 'yes')
+num_men = men_survival.filter(lambda x: len(x))
+num_women = women_survival.filter(lambda x: len(x))
+print(" men survival rate: ", num_men.aggregate(lambda x: len(x), 'fare')/men.aggregate(lambda x: len(x), "fare") * 100, "women survival rate:",
+      num_women.aggregate(lambda x: len(x), 'fare')/women.aggregate(lambda x: len(x), "fare")*100)
 
 
 # print("Test filter: only filtering out cities in Italy")
