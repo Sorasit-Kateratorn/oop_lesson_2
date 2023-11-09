@@ -135,6 +135,11 @@ num_women = women_survival.filter(lambda x: len(x))
 print(" men survival rate: ", num_men.aggregate(lambda x: len(x), 'fare')/men.aggregate(lambda x: len(x), "fare") * 100, "women survival rate:",
       num_women.aggregate(lambda x: len(x), 'fare')/women.aggregate(lambda x: len(x), "fare")*100)
 
+men_embark_southampton = men.filter(
+    lambda x: x['embarked'] == "Southampton")
+num_men_embark = men_embark_southampton.aggregate(lambda x: len(x), 'fare')
+print(num_men_embark)
+
 
 # print("Test filter: only filtering out cities in Italy")
 # my_table1_filtered = my_table1.filter(lambda x: x['country'] == 'Italy')
