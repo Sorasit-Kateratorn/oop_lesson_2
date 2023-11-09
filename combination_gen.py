@@ -15,7 +15,10 @@ def gen_comb_list(list_set):
         return [[]]
     else:
         result = []
-        for i in list[0]:
+        for i in list_set[0]:
             for j in gen_comb_list(list_set[1:]):
                 result.append([i] + j)
         return result
+
+
+print(gen_comb_list([[1, 2, 3], [4, 5], [6, 7, 8]]))
