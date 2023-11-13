@@ -205,3 +205,29 @@ def aggregate(self, function, aggregation_key):
         else:
             temps.append(item1[aggregation_key])
     return function(temps)
+
+
+class Table:
+
+    def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
+        unique_values_list = []
+        for key in keys_to_pivot_list:
+            _list = []
+            for d in self.select(keys_to_pivot_list):
+                if d.get(key) not in _list:
+                    _list.append(d.get(key))
+            unique_values_list.append(_list)
+        from combination_gen import gen_comb_list
+        comb = gen_comb_list(unique_values_list)
+        pivoted = []
+        for i in comb:
+            temp = self.filter(lambda x: x[keys_to_pivot_list[0]] == i[0])
+            for j in range(1, len(keys_to_pivot_list)):
+                temp = temp.filter(lambda x: x[keys_to_pivot_list[j]] == i[j])
+            temp_list = []
+            for a in range(len(keys_to_aggreagte_list)):
+                result = temp.aggregate(
+                    aggregate_func_list[a], keys_to_aggreagte_list[a])
+                temp_list.append(result)
+            pivoted.append([i, temp_list])
+        return pivoted
