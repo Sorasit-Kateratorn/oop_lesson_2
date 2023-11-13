@@ -185,3 +185,23 @@ print(" men survival rate: ", num_men.aggregate(lambda x: len(x), 'fare')/men.ag
 #         print(item['country'], my_table1_filtered.aggregate(lambda x: min(
 #             x), 'latitude'), my_table1_filtered.aggregate(lambda x: max(x), 'latitude'))
 # print()
+
+
+def __is_float(self, element):
+    if element is None:
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
+
+def aggregate(self, function, aggregation_key):
+    temps = []
+    for item1 in self.table:
+        if self.__is_float(item1[aggregation_key]):
+            temps.append(float(item1[aggregation_key]))
+        else:
+            temps.append(item1[aggregation_key])
+    return function(temps)
