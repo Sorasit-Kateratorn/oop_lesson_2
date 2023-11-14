@@ -90,6 +90,44 @@ class Table:
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 
+    def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
+        unique_values_list = []
+        for key in keys_to_pivot_list:
+            _list = []
+            for d in self.select(keys_to_pivot_list):
+                if d.get(key) not in _list:
+                    _list.append(d.get(key))
+            unique_values_list.append(_list)
+        # create list 2-D unique_values_list to aggregate
+
+        from combination_gen import gen_comb_list
+        comb = gen_comb_list(unique_values_list)
+        pivoted = []
+        for i in comb:
+            temp = self.filter(lambda x: x[keys_to_pivot_list[0]] == i[0])
+            for j in range(1, len(keys_to_pivot_list)):
+                temp = temp.filter(lambda x: x[keys_to_pivot_list[j]] == i[j])
+            temp_list = []
+            for a in range(len(keys_to_aggreagte_list)):
+                result = temp.aggregate(
+                    aggregate_func_list[a], keys_to_aggreagte_list[a])
+                temp_list.append(result)
+            pivoted.append([i, temp_list])
+        return pivoted
+
+        # for loop in data for keys_to_pivot_list
+        # average min max sum count in keys_to_aggreagte_list
+        # aggregate in function list = average min max sum count(select one of this function)
+
+    def __is_float(self, element):
+        if element is None:
+            return False
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
 
 table1 = Table('cities', cities)
 table2 = Table('countries', countries)
@@ -186,48 +224,45 @@ print(" men survival rate: ", num_men.aggregate(lambda x: len(x), 'fare')/men.ag
 #             x), 'latitude'), my_table1_filtered.aggregate(lambda x: max(x), 'latitude'))
 # print()
 
-
-def __is_float(self, element):
-    if element is None:
-        return False
-    try:
-        float(element)
-        return True
-    except ValueError:
-        return False
-
-
 def aggregate(self, function, aggregation_key):
     temps = []
-    for item1 in self.table:
-        if self.__is_float(item1[aggregation_key]):
-            temps.append(float(item1[aggregation_key]))
-        else:
-            temps.append(item1[aggregation_key])
-    return function(temps)
+    temp_value = 0
+    count = 0
+    # min max cnt(count) avg(average)
+    if function == "min":
+        for item1 in self.table:
+            if self.__is_float(item1[aggregation_key]):
+                temp_value = item1
+                if temp_value < item1:
+                    temps.append(temp_value)
+                else:
+                    temps.append(float(item1[aggregation_key]))
+            else:
+                temps.append(item1[aggregation_key])
+    if function == "max":
+        for item1 in self.table:
+            if self.__is_float(item1[aggregation_key]):
+                temp_value = item1
+                if temp_value > item1:
+                    temps.append(temp_value)
+                else:
+                    temps.append(float(item1[aggregation_key]))
+            else:
+                temps.append(item1[aggregation_key])
 
+    if function == "cnt":
+        for item1 in self.table:
+            if self.__is_float(item1[aggregation_key]):
+                count = count + 1
+            else:
+                return count
 
-class Table:
-
-    def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
-        unique_values_list = []
-        for key in keys_to_pivot_list:
-            _list = []
-            for d in self.select(keys_to_pivot_list):
-                if d.get(key) not in _list:
-                    _list.append(d.get(key))
-            unique_values_list.append(_list)
-        from combination_gen import gen_comb_list
-        comb = gen_comb_list(unique_values_list)
-        pivoted = []
-        for i in comb:
-            temp = self.filter(lambda x: x[keys_to_pivot_list[0]] == i[0])
-            for j in range(1, len(keys_to_pivot_list)):
-                temp = temp.filter(lambda x: x[keys_to_pivot_list[j]] == i[j])
-            temp_list = []
-            for a in range(len(keys_to_aggreagte_list)):
-                result = temp.aggregate(
-                    aggregate_func_list[a], keys_to_aggreagte_list[a])
-                temp_list.append(result)
-            pivoted.append([i, temp_list])
-        return pivoted
+    if function == "avg":
+        for item1 in self.table:
+            if self.__is_float(item1[aggregation_key]):
+                temps.append(float(item1[aggregation_key]))
+                count = count + 1
+            else:
+                temps.append(item1[aggregation_key])
+                if count != 0:
+                    return (temps.__getitem__/count)
